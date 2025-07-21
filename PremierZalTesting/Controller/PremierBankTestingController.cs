@@ -56,7 +56,7 @@ namespace PremierBankTesting.Controller
             try
             {
                 await _premierBankTestingServices.MarkTransactionAsProcessed(id);
-                return Ok($"транзакция {id} отмечана как обработанная");
+                return Ok($"транзакция {id} отмечена как обработанная");
             }
             catch (KeyNotFoundException ex)
             {
