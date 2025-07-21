@@ -33,12 +33,12 @@ namespace PremierBankTesting.Controller
             catch (KeyNotFoundException ex)
             {
                 _logger.LogError("Ошибка импорта транзакций");
-                return NotFound(ex.Message);
+                return StatusCode(400, ex.Message);
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogError("Ошибка импорта транзакций");
-                return BadRequest(ex.Message);
+                return StatusCode(404, ex.Message);
             }
             catch (Exception ex)
             {
@@ -56,15 +56,17 @@ namespace PremierBankTesting.Controller
             try
             {
                 await _premierBankTestingServices.MarkTransactionAsProcessed(id);
-                return Ok($"transaction {id} marked as Processed");
+                return Ok($"транзакция {id} отмечана как обработанная");
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                _logger.LogWarning("Ресурс не найден");
+                return StatusCode(400, ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogWarning("Некорректная операция");
+                return StatusCode(404, ex.Message);
             }
             catch (Exception ex)
             {
@@ -93,11 +95,13 @@ namespace PremierBankTesting.Controller
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                _logger.LogWarning("Ресурс не найден");
+                return StatusCode(400, ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogWarning("Некорректная операция");
+                return StatusCode(404, ex.Message);
             }
             catch (Exception ex)
             {
@@ -105,21 +109,32 @@ namespace PremierBankTesting.Controller
             }
         }
 
-        [HttpGet("\"reports/monthly-by-client")]
+        [HttpGet("reports/monthly-by-user")]
         public async Task<ActionResult<Dictionary<string, decimal>>> GetAllProcessedTransactionByClient()
         {
             try
             {
                 var data = await _premierBankTestingServices.GetMonthProcessedTransactionsGroupedByUser();
+
+                if (data.Count == 0)
+                {
+                    _logger.LogInformation("Не удалось найти записи для формирования отчета");
+                }
+                else if (data.Count > 0)
+                {
+                    _logger.LogInformation($"Сформирован отчет с {data.Count} записями ");
+                }
                 return Ok(data);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                _logger.LogWarning("Ресурс не найден");
+                return StatusCode(400, ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogWarning("Некорректная операция");
+                return StatusCode(404, ex.Message);
             }
             catch (Exception ex)
             {
@@ -137,11 +152,13 @@ namespace PremierBankTesting.Controller
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                _logger.LogWarning("Ресурс не найден");
+                return StatusCode(400, ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogWarning("Некорректная операция");
+                return StatusCode(404, ex.Message);
             }
             catch (Exception ex)
             {
