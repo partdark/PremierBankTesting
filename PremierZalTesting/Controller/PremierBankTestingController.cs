@@ -11,10 +11,13 @@ namespace PremierBankTesting.Controller
     public class PremierBankTestingController : ControllerBase
     {
         private readonly IPremierBankTestingServices _premierBankTestingServices;
+        private readonly ILogger<PremierBankTestingController> _logger;
 
-        public PremierBankTestingController(IPremierBankTestingServices premierBankTestingServices)
+        public PremierBankTestingController(IPremierBankTestingServices premierBankTestingServices,
+            ILogger<PremierBankTestingController> logger)
         {
             _premierBankTestingServices = premierBankTestingServices;
+            _logger = logger;
         }
 
         [HttpPost("transactions/import")]
@@ -24,19 +27,22 @@ namespace PremierBankTesting.Controller
             try
             {
                 var count = await _premierBankTestingServices.ImportData();
+                _logger.LogInformation($"Произошел импорт {count} записей");
                 return Ok($"Было импортировано {count} записей");
             }
             catch (KeyNotFoundException ex)
             {
-
+                _logger.LogError("Ошибка импорта транзакций");
                 return NotFound(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError("Ошибка импорта транзакций");
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError("Ошибка импорта транзакций");
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
 
